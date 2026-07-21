@@ -1,0 +1,88 @@
+<!--VITE PLUS START-->
+
+# Using Vite+, the Unified Toolchain for the Web
+
+This project is using Vite+, a unified toolchain built on top of Vite, Rolldown, Vitest, tsdown, Oxlint, Oxfmt, and Vite Task. Vite+ wraps runtime management, package management, and frontend tooling in a single global CLI called `vp`. Vite+ is distinct from Vite, and it invokes Vite through `vp dev` and `vp build`. Run `vp help` to print a list of commands and `vp <command> --help` for information about a specific command.
+
+Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.dev/guide/.
+
+## Review Checklist
+
+- [ ] Run `vp install` after pulling remote changes and before getting started.
+- [ ] Run `vp check` and `vp test` to format, lint, type check and test changes.
+- [ ] Check if there are `vite.config.ts` tasks or `package.json` scripts necessary for validation, run via `vp run <script>`.
+- [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
+
+<!--VITE PLUS END-->
+
+# Project Conventions
+
+## Commands
+
+Everything runs through the `vp` CLI (Vite+). `package.json` scripts wrap the common ones.
+
+- `vp install` — install deps (run after pulling; `pnpm` is the underlying package manager).
+- `pnpm dev` / `vp dev --port 3000` — dev server on :3000.
+- `vp build` — production build to `dist/`; `vp preview` — serve the built app.
+- `vp check` — format + lint + type-check (the one validation gate; don't run raw `tsc` or `vp fmt` by hand — see Workflow).
+- `vp test` — unit tests (watch); `vp test run` — once; `vp test run src/shared/ui/form/utils.test.ts` — one file; `vp test run -t "pattern"` — tests matching a name.
+- `pnpm e2e` — Playwright e2e (`vp build && vp exec playwright test`); `vp exec playwright test` alone reuses the existing `dist/`. See Testing for the shared in-memory server model.
+- `pnpm auth:migrate` / `pnpm auth:generate` — better-auth SQLite migrations (`vp exec auth …`).
+- `pnpm ui:add <name>` — add a shadcn component (`vp exec shadcn add`).
+- `vp env doctor` — diagnose toolchain/runtime/package-manager issues; include its output when asking for help.
+
+## Workflow
+
+- Don't run formatting (`vp fmt`) manually. Formatting failures from `vp check` on hand-written files need no action — the `staged` hook in `vite.config.ts` formats staged files before commit/push once this repo is under git. Always validate with plain `vp check` (no `--no-fmt`, and no raw `tsc`, which litters `tsconfig.tsbuildinfo` files).
+- Exception: when the user asks to change format rules (`fmt` options in `vite.config.ts`), run a one-time `vp fmt . --write` to migrate the whole repo, so checks stay green and the style churn doesn't leak into later feature commits.
+- If `vp check` flags formatting on a file you are certain is generated (e.g. `src/shared/router/routeTree.gen.ts`), extend `fmt.ignorePatterns` in `vite.config.ts` — that is the only check-related option you may change; never adjust other `fmt`/`lint` options to make checks pass. If unsure whether a file is generated, report to the user instead.
+- Don't write code comments. Code must explain itself; when rationale is worth keeping (a non-obvious invariant, a deliberate trade-off), record it in this file instead.
+
+## Testing
+
+- Verify behavior with tests, not by manually driving a browser: unit tests run with `vp test` (colocated `*.test.ts`, importing from `vite-plus/test` — e.g. `src/shared/ui/form/utils.test.ts`), end-to-end tests with Playwright via `pnpm e2e` (`vp build && vp exec playwright test`, or `vp exec playwright test` alone to reuse an already-built `dist/`).
+- E2e lives in the root `e2e/` dir, one Playwright project (`playwright.config.ts`). Its `webServer` always runs a production preview (`AUTH_DB_PATH=:memory: vp preview`, on the port from `E2E_BASE_URL` in `.env.local`/`.env.example`) — this app has no separate dev-API, so there's a single server for every spec, unlike a split dev-db/isolated-journeys setup.
+- Because every spec shares that one in-memory server, keep non-journey tests state-free: wrong logins, OTP/reset requests for unknown emails (the server always answers generic success — see anti-enumeration below). Full user journeys (sign-up → verify → land in app; password reset loop) live in `e2e/journeys/` and must generate a unique email per test (see `uniqueEmail()` in `auth-journeys.spec.ts`) since they actually create accounts against the shared in-memory db.
+- OTPs and reset links are read back via `GET /api/dev/mailbox/:email` (`src/pages/api/dev/mailbox.$email.ts`), backed by the in-process `Map` in `src/server/mailbox.ts`. The endpoint 404s unless `import.meta.env.DEV` or `AUTH_DB_PATH === ":memory:"` — it must stay usable in both plain `vp dev` (for manual testing) and the `:memory:` preview e2e runs; don't gate it on only one of those.
+- Prefer role/label selectors (`getByRole`, `getByLabel`). If an accessible-name query can't target an element cleanly, treat it as an a11y bug in the component and fix it there (e.g. decorative spinners must be `aria-hidden`, with `aria-busy` on the host) rather than working around it with CSS selectors.
+
+## Structure
+
+- Single TanStack Start app (no monorepo): `src/pages/` (file-based routes) → `src/features/` → `src/entities/` → `src/shared/`, plus `src/server/` for backend-only modules that sit outside the FSD layering entirely (see below).
+- `pages` and the (implicit) `app` layer have no slices — their internal shape is dictated by the framework, not FSD. TanStack Start conflates both here: `src/pages/__root.tsx` carries what would normally be the `app` layer's job (the provider tree — `ThemeProvider` → `I18nProvider` → `QueryClientProvider` → `Outlet`, in `RootLayout`) _and_ the root page route (`beforeLoad` session fetch, `errorComponent`, `notFoundComponent`, `shellComponent`) at once, because the router requires a single root route file. Don't try to split that apart to "purify" the layers — the framework's constraint wins here.
+- Routes use directories, never flat dot-notation: `sign-in/index.tsx` + `sign-in/code.tsx`, not `sign-in.code.tsx`. For sibling sub-routes, use a folder with `index.tsx` and no parent route file; add `<folder>/route.tsx` only when the children genuinely share a layout/outlet.
+- `widgets/` is FSD's optional layer for large self-contained page chunks assembled from several features/entities. This app is small enough that pages stay thin without it — don't add the layer speculatively; introduce it only once a block is reused across more than one page.
+- Every slice on the `features`/`entities` layers exposes a public API via `index.ts`; this does not apply to `shared` or `server`.
+- Imports follow three rules:
+  - Within one slice, segments import each other relatively (`./model`), and same-directory files always import relatively.
+  - Everything else imports a slice only through its public API (`@/features/auth/sign-in`) — reaching into a foreign slice's segments (`.../sign-in/ui`, `.../sign-in/model`) is forbidden, from any layer.
+  - `shared` is less strict: no barrels required, direct paths allowed (`@/shared/app-form`, `@/shared/ui/components/card`).
+- These boundary rules are enforced inside the normal lint pass by `fsd/boundaries`, a custom oxlint JS plugin (`fsd.mjs` at the repo root, wired via `lint.jsPlugins` + `lint.rules` in `vite.config.ts`), so every `vp lint`/`vp check` checks them — no separate command. It resolves layer direction, same-layer slice isolation (pages included), the relative-within-slice / alias-across rule, and public-API-only access to `features`/`entities` (and `widgets`, if ever added) slices from the actual file path + import specifier; slice roots are detected by their `index.ts`, so feature groups (`features/auth/*`) need no special-casing, and `*.gen.ts` is exempt (the generated route tree imports pages by design). `src/server/` sits outside the FSD layers, so the plugin ignores it — the "nothing outside `pages/` imports `server/`" rule is not one it can express; keep that by review. Don't weaken the rule to make checks pass — fix the code, or discuss in review. This plugin is ported from the FSD monorepo template this project descends from; the single-app difference is only that `@/` resolves to one `src` root instead of per-app roots.
+- Don't name a `shared` module after an entity or slice group — e.g. `shared/auth-client` (the better-auth browser SDK instance), never `shared/auth`, so it can't be confused with `entities/auth` (the domain vocabulary) or `server/auth` (the better-auth server instance). This shadowing risk is exactly why the three now have visibly different names.
+- `src/server/` holds everything that only runs server-side and isn't FSD's concern (FSD layers infrastructure for the _client_ app): the better-auth instance (`auth.ts`), its SQLite connection/migrations (`auth-db.ts`), session lookup (`session.ts`), and the dev-only mailbox store (`mailbox.ts`). It's a sibling to the FSD stack, not a layer inside it — `shared` is explicitly "infrastructure without business meaning," and better-auth's config encodes real domain rules (anti-enumeration, OTP types), so it doesn't belong there either. Nothing in `pages/`, `features/`, `entities/`, or `shared/` should import from `server/` except the thin route handlers that must (`pages/api/**`, `pages/__root.tsx`'s session load).
+- `src/shared/router/` holds the router instance (`index.ts`, exporting `getRouter`) colocated with the generated route tree (`routeTree.gen.ts`) — both `tsr.config.json` and the `tanstackStart()` plugin options in `vite.config.ts` point here. If you ever relocate either file, note that `tsr.config.json`'s `routesDirectory`/`generatedRouteTree` resolve relative to the project root, while `tanstackStart({ router: {...} })`'s resolve relative to `srcDirectory` (default `src`) — they are not the same base path despite looking parallel, and mixing them up silently resolves to a nonexistent `src/src/...` path.
+
+## Hooks & data (TanStack Query)
+
+- Import all TanStack Query APIs from `@/shared/query`, never from `@tanstack/react-query` directly.
+- Each feature exposes standalone hooks: one hook per mutation/query (`useSignIn`) plus a separate form hook (`useSignInForm`) that composes them. All hooks live together in the feature's `model.ts` — do not split into `api.ts`. Reference: `src/features/auth/sign-in/model.ts`. A mutation needed by several features (features must not import each other) moves to the entity with its UI if any — e.g. `useSendOtp(type)` + `ResendOtpButton` in `entities/auth`.
+- Form hooks accept optional `MutationCallbacks` (`onSuccess`/`onError`/`onSettled`) and forward them via `mutateAsync(value, callbacks)`; feature-level handlers stay on the mutation itself, page-level effects (navigation, etc.) are injected by the page.
+- better-auth API errors arrive as plain objects (matched by `isAuthError` in `entities/auth`), while anything the client itself throws (e.g. a network failure) is an `Error` instance — that distinction routes API errors to inline form display and transport errors to the global toast.
+- Error toasts are global: the `MutationCache` in `createAppQueryClient` (`src/shared/query/client.ts`) toasts every mutation error. Steer it with `meta.errorMessage` (string, `(error) => string | false | undefined` resolver, or `false` to opt out entirely). A resolver returning `false` skips the toast for that error only — used when the feature shows it inline (e.g. sign-in renders auth API errors via `<form.FormError />`, while thrown transport errors still toast). Requires `<Toaster />` mounted in the app root.
+- Set `gcTime: 0` on credential-bearing mutations (passwords, tokens) so variables don't linger in the mutation cache. Never persist mutations or log mutation variables.
+- `MutationMeta` (registered on `@tanstack/react-query`'s `Register` in `src/shared/query/client.ts`) must stay a `type` alias, not an `interface` (TanStack Query's `Record<string, unknown>` constraint).
+
+## Forms & validation
+
+- Build forms with `useAppForm` from `@/shared/app-form` (extends `workspaceForm` from `@/shared/ui/form`); validate with `blurFirstValidationLogic` and zod schemas.
+- Schema placement: `entities/` holds the domain vocabulary — field atoms (`emailSchema`, `passwordSchema`, `otpCodeSchema`), schemas/types genuinely shared by several features (`emailFormSchema`, `otpFormSchema`, `EmailOtpData`), and route search-param schemas. Each feature composes its own form schema from those atoms in its `model.ts` (with its `z.infer` type) — a new feature should only ever _add_ to the entity, never modify its existing exports; if it forces a modification, a feature-specific composition has leaked into the entity. Duplicating a trivial one-line composition (`z.object({ email: emailSchema })`) across two features is legitimate and cheaper than a premature shared abstraction.
+- `blurFirstValidationLogic` runs `onDynamic` validators on submit, and on change/blur once the field is blurred-and-dirty or after a submit attempt. Form-level validation carries no `fieldName` (`FormApi` passes none), so the blurred-and-dirty condition never applies there and form-level `onDynamic` validators are submit-first (change/blur revalidation only after a submit attempt). Prefer per-field schemas (`validators={{ onDynamic: schema.shape.x }}`) when blur-first UX is wanted; form-level classic validators (`onChange`/`onBlur`/`onSubmit`) follow `defaultValidationLogic` and may be combined with field validators.
+- Import `z` from `@/shared/i18n` (wired to `src/shared/i18n/zod-error-map.ts`), not from `zod` directly — one point where error messages are translated. That error map is a from-scratch reimplementation of `zod-i18n-map`'s `errors.*` i18next keys against Zod v4's issue shape (the upstream package only ever shipped a v3 build); when adding new validators, check the map covers the `invalid_format`/`too_small`/`too_big` case you're relying on before assuming a translated message will show.
+
+## Auth flow
+
+- Route guards live on the page layout routes: `pages/_authenticated.tsx` bounces sessionless visitors to `/sign-in` with `redirect` carrying the return URL; `pages/_auth.tsx` bounces already-signed-in visitors away via `resolveRedirectPath(search.redirect)` (`entities/auth/model.ts`). Both navigate in-app (`redirect()`/`router.navigate`) — this is one origin, not a cross-app hop, so there's never a reason to fall back to `window.location`.
+- Email verification is OTP-only (`emailOTP` with `overrideDefaultEmailVerification`; sign-up emails a 6-digit code via `emailVerification.sendOnSignUp`): no session is created until the email is confirmed, so after sign-up the user is parked on `/verify-email`, and verifying signs them in (`autoSignInAfterVerification`).
+- Anti-enumeration invariants — keep intact: send-email/OTP endpoints report success for unknown emails; sign-up answers an existing email with better-auth's generic duplicate response while `onExistingUserSignUp` notifies the real owner instead (a production mailer there should suggest sign-in/password reset, or a fresh verification link for unverified accounts); `emailOTP({ disableSignUp: true })` stops sign-in codes from silently creating nameless accounts.
+- Password reset is link-based (unlike sign-in/verification, which are OTP): `/forgot-password` requests the link (`requestPasswordReset` always answers with a generic success, so submitted emails are never confirmed to exist); the emailed link hits the API token callback and lands on `/reset-password` with `?token=` (valid) or `?error=INVALID_TOKEN` (expired/used); `redirect` and `email` ride on `redirectTo`, and a successful reset lands on the sign-in password form with the email prefilled. `revokeSessionsOnPasswordReset` invalidates existing sessions. Don't switch reset to `checkVerificationOtp`-style OTP steps — that endpoint returns `USER_NOT_FOUND` for unknown emails, the one enumeration leak in the plugin.
+- In dev, sent OTPs/links aren't only in the terminal log (`console.log` in `src/server/auth.ts` — and in this project's `vp dev`, server-side `console.log` from route/server-function handlers doesn't reliably reach the terminal at all, a toolchain quirk, not a code bug). Read them back from `GET /api/dev/mailbox/:email` instead — see Testing above for the endpoint's dev/`:memory:` gate.

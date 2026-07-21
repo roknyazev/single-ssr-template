@@ -1,0 +1,69 @@
+import {
+  createFileRoute,
+  redirect as routerRedirect,
+} from '@tanstack/react-router'
+
+import {
+  emailSearchSchema,
+  ResendOtpButton,
+  useRedirectAfterAuth,
+} from '@/entities/auth'
+import { SignInOtpCode, useSignInOtpForm } from '@/features/auth/sign-in-otp'
+import { AuthCard, AuthCardForm, AuthCardFooter } from '@/shared/auth-card'
+import { useTranslation } from '@/shared/i18n'
+import { Button } from '@/shared/ui/components/button'
+
+export const Route = createFileRoute('/_auth/sign-in/code')({
+  validateSearch: emailSearchSchema,
+  beforeLoad: ({ search }) => {
+    if (!search.email) {
+      throw routerRedirect({
+        to: '/sign-in',
+        search: { redirect: search.redirect },
+      })
+    }
+  },
+  component: RouteComponent,
+})
+
+function RouteComponent() {
+  const { t } = useTranslation()
+  const { redirect, email: emailParam } = Route.useSearch()
+  const email = emailParam ?? ''
+  const navigate = Route.useNavigate()
+  const redirectAfterAuth = useRedirectAfterAuth()
+  const otpForm = useSignInOtpForm(email, {
+    onSuccess: () => redirectAfterAuth(redirect),
+  })
+
+  return (
+    <otpForm.AppForm>
+      <AuthCard
+        title={t('auth.signIn.title')}
+        description={t('auth.signIn.otpCodeDescription', { email })}
+      >
+        <AuthCardForm
+          footer={
+            <otpForm.Submit className={'w-full'}>
+              {t('auth.signIn.submitButton')}
+            </otpForm.Submit>
+          }
+        >
+          <SignInOtpCode form={otpForm} autoFocus />
+        </AuthCardForm>
+        <AuthCardFooter>
+          <ResendOtpButton email={email} type={'sign-in'} />
+          <Button
+            variant={'ghost'}
+            className={'w-full'}
+            onClick={() =>
+              navigate({ to: '/sign-in/password', search: { redirect, email } })
+            }
+          >
+            {t('auth.signIn.usePasswordButton')}
+          </Button>
+        </AuthCardFooter>
+      </AuthCard>
+    </otpForm.AppForm>
+  )
+}
