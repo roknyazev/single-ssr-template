@@ -32,12 +32,27 @@ function sliceDepth(srcRoot, layer, restSegments) {
   return -1
 }
 
+function relativeLeavesSlice(importerDir, sliceAbs, specifier) {
+  let cur = importerDir
+  for (const part of specifier.split('/')) {
+    if (part === '' || part === '.') continue
+    cur = part === '..' ? path.dirname(cur) : path.join(cur, part)
+    if (cur !== sliceAbs && !cur.startsWith(sliceAbs + path.sep)) return true
+  }
+  return false
+}
+
+function canonicalRelative(importerDir, targetAbs) {
+  const rel = path.relative(importerDir, targetAbs).split(path.sep).join('/')
+  return rel.startsWith('..') ? rel : `./${rel}`
+}
+
 const boundaries = {
   meta: {
     type: 'problem',
     docs: {
       description:
-        'Enforce FSD layer direction, slice isolation, and public-API imports',
+        'Enforce FSD layer direction, slice isolation, public-API imports, and canonical within-slice relative paths',
     },
   },
   create(context) {
@@ -107,6 +122,13 @@ const boundaries = {
               node,
               message:
                 'FSD: use a relative path for imports within the same slice.',
+            })
+          } else if (
+            relativeLeavesSlice(importerDir, importerSliceAbs, specifier)
+          ) {
+            context.report({
+              node,
+              message: `FSD: within-slice import must stay inside the slice; use "${canonicalRelative(importerDir, targetAbs)}", not "${specifier}".`,
             })
           }
           return
