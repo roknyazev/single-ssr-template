@@ -11,14 +11,15 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { useEffect } from 'react'
 
 import { getSession } from '@/server/session'
-import { ConnectionError } from '@/shared/connection-error'
 import { I18nProvider } from '@/shared/i18n'
-import { NotFound } from '@/shared/not-found'
 import { QueryClientProvider } from '@/shared/query'
 import type { QueryClient } from '@/shared/query'
 import TanStackQueryDevtools from '@/shared/query/devtools'
 import { Toaster } from '@/shared/ui/components/sonner'
 import { ThemeProvider } from '@/shared/ui/providers/theme-provider'
+
+import { ConnectionError } from './-components/connection-error'
+import { NotFound } from './-components/not-found'
 
 import appCss from '@/shared/ui/styles/globals.css?url'
 

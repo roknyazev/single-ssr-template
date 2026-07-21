@@ -5,7 +5,7 @@ import { SpinnerAddon } from '@/shared/ui/components/spinner-addon'
 
 import { useFormContext } from '../form-context'
 
-export function WorkspaceSubmitButton({
+export function AppSubmitButton({
   children,
   ...rest
 }: ComponentProps<typeof Button>) {

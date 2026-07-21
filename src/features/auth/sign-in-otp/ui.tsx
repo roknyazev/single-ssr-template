@@ -1,4 +1,9 @@
-import { emailFormSchema, otpFormSchema } from '@/entities/auth'
+import {
+  AuthEmailField,
+  AuthOtpField,
+  emailFormSchema,
+  otpFormSchema,
+} from '@/entities/auth'
 import { useTranslation } from '@/shared/i18n'
 
 import { useSignInOtpForm, useSignInOtpRequestForm } from './model'
@@ -15,8 +20,8 @@ export const SignInOtpEmail = ({
     <form.AppField
       validators={{ onDynamic: emailFormSchema.shape.email }}
       name={'email'}
-      children={field => (
-        <field.Email
+      children={() => (
+        <AuthEmailField
           label={t('auth.signIn.emailLabel')}
           autoFocus={autoFocus}
         />
@@ -37,8 +42,8 @@ export const SignInOtpCode = ({
     <form.AppField
       validators={{ onDynamic: otpFormSchema.shape.otp }}
       name={'otp'}
-      children={field => (
-        <field.Otp label={t('auth.signIn.otpLabel')} autoFocus={autoFocus} />
+      children={() => (
+        <AuthOtpField label={t('auth.signIn.otpLabel')} autoFocus={autoFocus} />
       )}
     />
   )

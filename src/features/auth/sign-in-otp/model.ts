@@ -7,9 +7,9 @@ import {
   type EmailFormData,
   type EmailOtpData,
 } from '@/entities/auth'
-import { useAppForm } from '@/shared/app-form'
 import { authClient } from '@/shared/auth-client'
 import { useMutation, type MutationCallbacks } from '@/shared/query'
+import { useAppForm } from '@/shared/ui/form'
 import { blurFirstValidationLogic } from '@/shared/ui/form'
 
 export type SendSignInOtpCallbacks = MutationCallbacks<

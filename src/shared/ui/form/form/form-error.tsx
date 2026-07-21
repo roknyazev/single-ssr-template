@@ -40,7 +40,7 @@ function FormErrorAlert({
   )
 }
 
-export function WorkspaceFormError({ id, ...props }: ComponentProps<'div'>) {
+export function AppFormError({ id, ...props }: ComponentProps<'div'>) {
   const form = useFormContext()
 
   return (

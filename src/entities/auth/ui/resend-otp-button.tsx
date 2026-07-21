@@ -2,7 +2,7 @@ import { useTranslation } from '@/shared/i18n'
 import { Button } from '@/shared/ui/components/button'
 import { SpinnerAddon } from '@/shared/ui/components/spinner-addon'
 
-import { useSendOtp, type EmailFormData, type OtpType } from './model'
+import { useSendOtp, type EmailFormData, type OtpType } from '../model'
 
 export const ResendOtpButton = ({
   email,

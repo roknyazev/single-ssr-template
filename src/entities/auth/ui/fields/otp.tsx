@@ -12,7 +12,7 @@ import {
 
 const OTP_LENGTH = 6
 
-export function AppOtpField({
+export function AuthOtpField({
   label,
   autoFocus,
 }: {

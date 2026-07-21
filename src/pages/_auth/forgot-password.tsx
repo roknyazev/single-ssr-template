@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
-import { authSearchSchema } from '@/entities/auth'
+import {
+  AuthCard,
+  AuthCardFooter,
+  AuthCardForm,
+  authSearchSchema,
+} from '@/entities/auth'
 import {
   ForgotPasswordEmail,
   useForgotPasswordForm,
 } from '@/features/auth/forgot-password'
-import { AuthCard, AuthCardForm, AuthCardFooter } from '@/shared/auth-card'
 import { useTranslation } from '@/shared/i18n'
 
 export const Route = createFileRoute('/_auth/forgot-password')({

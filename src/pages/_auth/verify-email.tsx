@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
 import {
+  AuthCard,
+  AuthCardFooter,
+  AuthCardForm,
   emailSearchSchema,
   ResendOtpButton,
   useRedirectAfterAuth,
@@ -9,7 +12,6 @@ import {
   useVerifyEmailOtpForm,
   VerifyEmailOtp,
 } from '@/features/auth/verify-email'
-import { AuthCard, AuthCardForm, AuthCardFooter } from '@/shared/auth-card'
 import { useTranslation } from '@/shared/i18n'
 
 export const Route = createFileRoute('/_auth/verify-email')({

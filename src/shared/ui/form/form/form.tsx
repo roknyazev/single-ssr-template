@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react'
 
 import { useFormContext } from '../form-context'
 
-export function WorkspaceForm({ onSubmit, ...props }: ComponentProps<'form'>) {
+export function AppForm({ onSubmit, ...props }: ComponentProps<'form'>) {
   const form = useFormContext()
 
   return (

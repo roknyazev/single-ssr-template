@@ -105,6 +105,9 @@ const boundaries = {
       if (target.rank === importer.rank) {
         if (target.layer === 'shared' || target.layer === 'app') return
         if (target.layer === 'pages') {
+          const isColocated = rest =>
+            rest.split('/').some(segment => segment.startsWith('-'))
+          if (isColocated(target.rest) || isColocated(importer.rest)) return
           context.report({
             node,
             message:

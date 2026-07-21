@@ -1,4 +1,4 @@
-import { otpFormSchema } from '@/entities/auth'
+import { AuthOtpField, otpFormSchema } from '@/entities/auth'
 import { useTranslation } from '@/shared/i18n'
 
 import { useVerifyEmailOtpForm } from './model'
@@ -15,8 +15,8 @@ export const VerifyEmailOtp = ({
     <form.AppField
       validators={{ onDynamic: otpFormSchema.shape.otp }}
       name={'otp'}
-      children={field => (
-        <field.Otp
+      children={() => (
+        <AuthOtpField
           label={t('auth.verifyEmail.otpLabel')}
           autoFocus={autoFocus}
         />

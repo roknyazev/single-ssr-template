@@ -4,12 +4,14 @@ import {
 } from '@tanstack/react-router'
 
 import {
+  AuthCard,
+  AuthCardFooter,
+  AuthCardForm,
   emailSearchSchema,
   ResendOtpButton,
   useRedirectAfterAuth,
 } from '@/entities/auth'
 import { SignInOtpCode, useSignInOtpForm } from '@/features/auth/sign-in-otp'
-import { AuthCard, AuthCardForm, AuthCardFooter } from '@/shared/auth-card'
 import { useTranslation } from '@/shared/i18n'
 import { Button } from '@/shared/ui/components/button'
 

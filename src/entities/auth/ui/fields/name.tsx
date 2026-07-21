@@ -1,6 +1,6 @@
 import { fieldComponents } from '@/shared/ui/form'
 
-export function AppNameField({
+export function AuthNameField({
   label,
   autoFocus,
 }: {

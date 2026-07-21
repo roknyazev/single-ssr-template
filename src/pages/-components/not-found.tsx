@@ -1,17 +1,24 @@
 import { Link } from '@tanstack/react-router'
 
-import { AuthCard, AuthCardFooter } from '@/shared/auth-card'
 import { useTranslation } from '@/shared/i18n'
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/shared/ui/components/card'
 
 export function NotFound() {
   const { t } = useTranslation()
   return (
     <main className={'flex min-h-svh items-center justify-center'}>
-      <AuthCard
-        title={t('common.notFound.title')}
-        description={t('common.notFound.description')}
-      >
-        <AuthCardFooter>
+      <Card className={'w-full max-w-sm'}>
+        <CardHeader>
+          <CardTitle>{t('common.notFound.title')}</CardTitle>
+          <CardDescription>{t('common.notFound.description')}</CardDescription>
+        </CardHeader>
+        <CardFooter className={'flex-col gap-4'}>
           <Link
             to={'/'}
             className={
@@ -20,8 +27,8 @@ export function NotFound() {
           >
             {t('common.notFound.homeLink')}
           </Link>
-        </AuthCardFooter>
-      </AuthCard>
+        </CardFooter>
+      </Card>
     </main>
   )
 }

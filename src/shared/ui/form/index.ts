@@ -1,39 +1,37 @@
 import { createFormHook } from '@tanstack/react-form'
 
 import {
-  WorkspaceFieldRoot,
-  WorkspaceFieldError,
-  WorkspaceInput,
-  WorkspaceInputGroupInput,
-  WorkspaceFieldLabel,
+  AppFieldRoot,
+  AppFieldError,
+  AppInput,
+  AppInputGroupInput,
+  AppFieldLabel,
 } from './field'
-import {
-  WorkspaceForm,
-  WorkspaceSubmitButton,
-  WorkspaceFormError,
-} from './form'
+import { AppForm, AppSubmitButton, AppFormError } from './form'
 import { fieldContext, formContext } from './form-context'
 
 const fieldComponents = {
-  Root: WorkspaceFieldRoot,
-  Error: WorkspaceFieldError,
-  Label: WorkspaceFieldLabel,
-  Input: WorkspaceInput,
-  InputGroupInput: WorkspaceInputGroupInput,
+  Root: AppFieldRoot,
+  Error: AppFieldError,
+  Label: AppFieldLabel,
+  Input: AppInput,
+  InputGroupInput: AppInputGroupInput,
 }
 
 const formComponents = {
-  Root: WorkspaceForm,
-  Submit: WorkspaceSubmitButton,
-  Error: WorkspaceFormError,
+  Root: AppForm,
+  Submit: AppSubmitButton,
+  Error: AppFormError,
 }
 
-export const workspaceForm = createFormHook({
+export const appForm = createFormHook({
   fieldContext,
   formContext,
   fieldComponents,
   formComponents,
 })
+
+export const { useAppForm } = appForm
 
 export { useFieldContext, useFormContext } from './form-context'
 export { fieldComponents, formComponents }

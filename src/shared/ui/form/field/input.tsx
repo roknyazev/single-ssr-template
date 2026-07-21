@@ -10,9 +10,7 @@ import { SpinnerAddon } from '@/shared/ui/components/spinner-addon'
 import { useFieldContext } from '../form-context'
 import { getFieldErrorId, getFieldId } from '../utils'
 
-export function WorkspaceInput({
-  ...props
-}: ComponentProps<typeof InputGroupInput>) {
+export function AppInput({ ...props }: ComponentProps<typeof InputGroupInput>) {
   const field = useFieldContext<string | number | readonly string[]>()
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
   const isValidating = field.state.meta.isValidating
@@ -38,7 +36,7 @@ export function WorkspaceInput({
   )
 }
 
-export function WorkspaceInputGroupInput({
+export function AppInputGroupInput({
   ...props
 }: ComponentProps<typeof InputGroupInput>) {
   const field = useFieldContext<string | number | readonly string[]>()

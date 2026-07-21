@@ -1,3 +1,8 @@
+import {
+  AuthEmailField,
+  AuthNameField,
+  AuthPasswordField,
+} from '@/entities/auth'
 import { useTranslation } from '@/shared/i18n'
 
 import { signUpSchema, useSignUpForm } from './model'
@@ -14,8 +19,11 @@ export const SignUpName = ({
     <form.AppField
       validators={{ onDynamic: signUpSchema.shape.name }}
       name={'name'}
-      children={field => (
-        <field.Name label={t('auth.signUp.nameLabel')} autoFocus={autoFocus} />
+      children={() => (
+        <AuthNameField
+          label={t('auth.signUp.nameLabel')}
+          autoFocus={autoFocus}
+        />
       )}
     />
   )
@@ -31,7 +39,7 @@ export const SignUpEmail = ({
     <form.AppField
       validators={{ onDynamic: signUpSchema.shape.email }}
       name={'email'}
-      children={field => <field.Email label={t('auth.signUp.emailLabel')} />}
+      children={() => <AuthEmailField label={t('auth.signUp.emailLabel')} />}
     />
   )
 }
@@ -46,8 +54,8 @@ export const SignUpPassword = ({
     <form.AppField
       validators={{ onDynamic: signUpSchema.shape.password }}
       name={'password'}
-      children={field => (
-        <field.Password
+      children={() => (
+        <AuthPasswordField
           label={t('auth.signUp.passwordLabel')}
           autoComplete={'new-password'}
         />

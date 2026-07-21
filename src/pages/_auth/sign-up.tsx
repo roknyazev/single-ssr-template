@@ -1,13 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
-import { authSearchSchema } from '@/entities/auth'
+import { AuthCard, AuthCardForm, authSearchSchema } from '@/entities/auth'
 import {
   SignUpEmail,
   SignUpName,
   SignUpPassword,
   useSignUpForm,
 } from '@/features/auth/sign-up'
-import { AuthCard, AuthCardForm } from '@/shared/auth-card'
 import { useTranslation } from '@/shared/i18n'
 
 export const Route = createFileRoute('/_auth/sign-up')({

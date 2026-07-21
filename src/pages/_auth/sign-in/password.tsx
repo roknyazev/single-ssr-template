@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
-import { emailSearchSchema, useRedirectAfterAuth } from '@/entities/auth'
+import {
+  AuthCard,
+  AuthCardForm,
+  emailSearchSchema,
+  useRedirectAfterAuth,
+} from '@/entities/auth'
 import {
   SignInEmail,
   SignInPassword,
   useSignInForm,
 } from '@/features/auth/sign-in'
-import { AuthCard, AuthCardForm } from '@/shared/auth-card'
 import { useTranslation } from '@/shared/i18n'
 import { Button } from '@/shared/ui/components/button'
 

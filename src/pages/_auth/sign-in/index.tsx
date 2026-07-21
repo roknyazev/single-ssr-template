@@ -1,11 +1,10 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
-import { authSearchSchema } from '@/entities/auth'
+import { AuthCard, AuthCardForm, authSearchSchema } from '@/entities/auth'
 import {
   SignInOtpEmail,
   useSignInOtpRequestForm,
 } from '@/features/auth/sign-in-otp'
-import { AuthCard, AuthCardForm } from '@/shared/auth-card'
 import { useTranslation } from '@/shared/i18n'
 import { Button } from '@/shared/ui/components/button'
 

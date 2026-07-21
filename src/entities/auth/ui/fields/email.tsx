@@ -1,6 +1,6 @@
 import { fieldComponents } from '@/shared/ui/form'
 
-export function AppEmailField({
+export function AuthEmailField({
   label,
   autoFocus,
 }: {

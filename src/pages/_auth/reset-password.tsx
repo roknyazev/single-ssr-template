@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 
-import { resetPasswordSearchSchema } from '@/entities/auth'
+import {
+  AuthCard,
+  AuthCardFooter,
+  AuthCardForm,
+  resetPasswordSearchSchema,
+} from '@/entities/auth'
 import {
   ResetPasswordPassword,
   useResetPasswordForm,
 } from '@/features/auth/reset-password'
-import { AuthCard, AuthCardForm, AuthCardFooter } from '@/shared/auth-card'
 import { useTranslation } from '@/shared/i18n'
 
 export const Route = createFileRoute('/_auth/reset-password')({

@@ -5,10 +5,10 @@ import {
   useAuthFormErrorHandler,
   type AuthError,
 } from '@/entities/auth'
-import { useAppForm } from '@/shared/app-form'
 import { authClient } from '@/shared/auth-client'
 import { z } from '@/shared/i18n'
 import { useMutation, type MutationCallbacks } from '@/shared/query'
+import { useAppForm } from '@/shared/ui/form'
 import { blurFirstValidationLogic } from '@/shared/ui/form'
 
 export const resetPasswordSchema = z.object({

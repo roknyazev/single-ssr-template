@@ -1,3 +1,4 @@
+import { AuthPasswordField } from '@/entities/auth'
 import { useTranslation } from '@/shared/i18n'
 
 import { resetPasswordSchema, useResetPasswordForm } from './model'
@@ -14,8 +15,8 @@ export const ResetPasswordPassword = ({
     <form.AppField
       validators={{ onDynamic: resetPasswordSchema.shape.password }}
       name={'password'}
-      children={field => (
-        <field.Password
+      children={() => (
+        <AuthPasswordField
           label={t('auth.resetPassword.passwordLabel')}
           autoComplete={'new-password'}
           autoFocus={autoFocus}

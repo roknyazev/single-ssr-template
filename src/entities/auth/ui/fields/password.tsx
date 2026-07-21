@@ -9,7 +9,7 @@ import {
 } from '@/shared/ui/components/input-group'
 import { fieldComponents } from '@/shared/ui/form'
 
-export function AppPasswordField({
+export function AuthPasswordField({
   label,
   autoComplete,
   autoFocus,

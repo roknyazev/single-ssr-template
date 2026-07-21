@@ -1,3 +1,4 @@
+import { AuthEmailField, AuthPasswordField } from '@/entities/auth'
 import { useTranslation } from '@/shared/i18n'
 
 import { signInSchema, useSignInForm } from './model'
@@ -14,8 +15,8 @@ export const SignInEmail = ({
     <form.AppField
       validators={{ onDynamic: signInSchema.shape.email }}
       name={'email'}
-      children={field => (
-        <field.Email
+      children={() => (
+        <AuthEmailField
           label={t('auth.signIn.emailLabel')}
           autoFocus={autoFocus}
         />
@@ -36,8 +37,8 @@ export const SignInPassword = ({
     <form.AppField
       validators={{ onDynamic: signInSchema.shape.password }}
       name={'password'}
-      children={field => (
-        <field.Password
+      children={() => (
+        <AuthPasswordField
           label={t('auth.signIn.passwordLabel')}
           autoComplete={'current-password'}
           autoFocus={autoFocus}
