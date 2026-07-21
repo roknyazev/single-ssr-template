@@ -2,7 +2,6 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 
 import {
   AuthCard,
-  AuthCardFooter,
   AuthCardForm,
   emailSearchSchema,
   ResendOtpButton,
@@ -13,6 +12,7 @@ import {
   VerifyEmailOtp,
 } from '@/features/auth/verify-email'
 import { useTranslation } from '@/shared/i18n'
+import { CardFooter } from '@/shared/ui/components/card'
 
 export const Route = createFileRoute('/_auth/verify-email')({
   validateSearch: emailSearchSchema,
@@ -48,7 +48,7 @@ function RouteComponent() {
             <VerifyEmailOtp form={form} autoFocus />
           </AuthCardForm>
         )}
-        <AuthCardFooter>
+        <CardFooter className={'flex-col gap-4'}>
           {email && (
             <ResendOtpButton email={email} type={'email-verification'} />
           )}
@@ -61,7 +61,7 @@ function RouteComponent() {
           >
             {t('auth.verifyEmail.backToSignIn')}
           </Link>
-        </AuthCardFooter>
+        </CardFooter>
       </AuthCard>
     </form.AppForm>
   )

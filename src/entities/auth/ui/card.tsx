@@ -48,11 +48,9 @@ export function AuthCardForm({
           {children}
         </FieldGroup>
       </CardContent>
-      {footer != null && <AuthCardFooter>{footer}</AuthCardFooter>}
+      {footer != null && (
+        <CardFooter className={'flex-col gap-4'}>{footer}</CardFooter>
+      )}
     </formComponents.Root>
   )
-}
-
-export function AuthCardFooter({ children }: { children: ReactNode }) {
-  return <CardFooter className={'flex-col gap-4'}>{children}</CardFooter>
 }

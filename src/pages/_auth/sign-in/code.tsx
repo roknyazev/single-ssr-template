@@ -5,7 +5,6 @@ import {
 
 import {
   AuthCard,
-  AuthCardFooter,
   AuthCardForm,
   emailSearchSchema,
   ResendOtpButton,
@@ -14,6 +13,7 @@ import {
 import { SignInOtpCode, useSignInOtpForm } from '@/features/auth/sign-in-otp'
 import { useTranslation } from '@/shared/i18n'
 import { Button } from '@/shared/ui/components/button'
+import { CardFooter } from '@/shared/ui/components/card'
 
 export const Route = createFileRoute('/_auth/sign-in/code')({
   validateSearch: emailSearchSchema,
@@ -53,7 +53,7 @@ function RouteComponent() {
         >
           <SignInOtpCode form={otpForm} autoFocus />
         </AuthCardForm>
-        <AuthCardFooter>
+        <CardFooter className={'flex-col gap-4'}>
           <ResendOtpButton email={email} type={'sign-in'} />
           <Button
             variant={'ghost'}
@@ -64,7 +64,7 @@ function RouteComponent() {
           >
             {t('auth.signIn.usePasswordButton')}
           </Button>
-        </AuthCardFooter>
+        </CardFooter>
       </AuthCard>
     </otpForm.AppForm>
   )

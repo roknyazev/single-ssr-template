@@ -1,17 +1,13 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
-import {
-  AuthCard,
-  AuthCardFooter,
-  AuthCardForm,
-  authSearchSchema,
-} from '@/entities/auth'
+import { AuthCard, AuthCardForm, authSearchSchema } from '@/entities/auth'
 import {
   ForgotPasswordEmail,
   useForgotPasswordForm,
 } from '@/features/auth/forgot-password'
 import { useTranslation } from '@/shared/i18n'
+import { CardFooter } from '@/shared/ui/components/card'
 
 export const Route = createFileRoute('/_auth/forgot-password')({
   validateSearch: authSearchSchema,
@@ -52,7 +48,7 @@ function RouteComponent() {
           email: sentTo,
         })}
       >
-        <AuthCardFooter>{backToSignIn}</AuthCardFooter>
+        <CardFooter className={'flex-col gap-4'}>{backToSignIn}</CardFooter>
       </AuthCard>
     )
   }

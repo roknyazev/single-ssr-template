@@ -2,7 +2,6 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 
 import {
   AuthCard,
-  AuthCardFooter,
   AuthCardForm,
   resetPasswordSearchSchema,
 } from '@/entities/auth'
@@ -11,6 +10,7 @@ import {
   useResetPasswordForm,
 } from '@/features/auth/reset-password'
 import { useTranslation } from '@/shared/i18n'
+import { CardFooter } from '@/shared/ui/components/card'
 
 export const Route = createFileRoute('/_auth/reset-password')({
   validateSearch: resetPasswordSearchSchema,
@@ -32,7 +32,7 @@ function RouteComponent() {
         title={t('auth.resetPassword.title')}
         description={t('auth.resetPassword.invalidLinkDescription')}
       >
-        <AuthCardFooter>
+        <CardFooter className={'flex-col gap-4'}>
           <Link
             to={'/forgot-password'}
             search={{ redirect }}
@@ -42,7 +42,7 @@ function RouteComponent() {
           >
             {t('auth.resetPassword.requestNewLink')}
           </Link>
-        </AuthCardFooter>
+        </CardFooter>
       </AuthCard>
     )
   }
