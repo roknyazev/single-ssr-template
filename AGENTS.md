@@ -19,16 +19,16 @@ Docs are local at `node_modules/vite-plus/docs` or online at https://viteplus.de
 
 ## Commands
 
-Everything runs through the `vp` CLI (Vite+). `package.json` scripts wrap the common ones.
+Everything runs through the `vp` CLI (Vite+); it drives `pnpm` underneath, so **never call `pnpm`/`npm`/`npx`/`pnpm dlx` directly** when a `vp` command exists. Run a wrapped `package.json` script with `vp run <script>` (extra args pass through: `vp run ui:add button`), the underlying tool with `vp exec <tool> …`, and one-off packages with `vp exec`/`vp dlx` rather than `pnpm dlx`. Package management (`vp install`/`vp add`/`vp remove`) also goes through `vp`, not `pnpm`.
 
-- `vp install` — install deps (run after pulling; `pnpm` is the underlying package manager).
-- `pnpm dev` / `vp dev --port 3000` — dev server on :3000.
+- `vp install` — install deps (run after pulling; `vp` drives `pnpm` under the hood — don't call `pnpm install` yourself).
+- `vp run dev` / `vp dev --port 3000` — dev server on :3000.
 - `vp build` — production build to `dist/`; `vp preview` — serve the built app.
 - `vp check` — format + lint + type-check (the one validation gate; don't run raw `tsc` or `vp fmt` by hand — see Workflow).
 - `vp test` — unit tests (watch); `vp test run` — once; `vp test run src/shared/ui/form/utils.test.ts` — one file; `vp test run -t "pattern"` — tests matching a name.
-- `pnpm e2e` — Playwright e2e (`vp build && vp exec playwright test`); `vp exec playwright test` alone reuses the existing `dist/`. See Testing for the shared in-memory server model.
-- `pnpm auth:migrate` / `pnpm auth:generate` — better-auth SQLite migrations (`vp exec auth …`).
-- `pnpm ui:add <name>` — add a shadcn component (`vp exec shadcn add`).
+- `vp run e2e` — Playwright e2e (`vp build && vp exec playwright test`); `vp exec playwright test` alone reuses the existing `dist/`. See Testing for the shared in-memory server model.
+- `vp run auth:migrate` / `vp run auth:generate` — better-auth SQLite migrations (wrap `vp exec auth migrate`/`generate`).
+- `vp run ui:add <name>` — add a shadcn component (wraps `vp exec shadcn add`).
 - `vp env doctor` — diagnose toolchain/runtime/package-manager issues; include its output when asking for help.
 
 ## Workflow
@@ -40,7 +40,7 @@ Everything runs through the `vp` CLI (Vite+). `package.json` scripts wrap the co
 
 ## Testing
 
-- Verify behavior with tests, not by manually driving a browser: unit tests run with `vp test` (colocated `*.test.ts`, importing from `vite-plus/test` — e.g. `src/shared/ui/form/utils.test.ts`), end-to-end tests with Playwright via `pnpm e2e` (`vp build && vp exec playwright test`, or `vp exec playwright test` alone to reuse an already-built `dist/`).
+- Verify behavior with tests, not by manually driving a browser: unit tests run with `vp test` (colocated `*.test.ts`, importing from `vite-plus/test` — e.g. `src/shared/ui/form/utils.test.ts`), end-to-end tests with Playwright via `vp run e2e` (`vp build && vp exec playwright test`, or `vp exec playwright test` alone to reuse an already-built `dist/`).
 - E2e lives in the root `e2e/` dir, one Playwright project (`playwright.config.ts`). Its `webServer` always runs a production preview (`AUTH_DB_PATH=:memory: vp preview`, on the port from `E2E_BASE_URL` in `.env.local`/`.env.example`) — this app has no separate dev-API, so there's a single server for every spec, unlike a split dev-db/isolated-journeys setup.
 - Because every spec shares that one in-memory server, keep non-journey tests state-free: wrong logins, OTP/reset requests for unknown emails (the server always answers generic success — see anti-enumeration below). Full user journeys (sign-up → verify → land in app; password reset loop) live in `e2e/journeys/` and must generate a unique email per test (see `uniqueEmail()` in `auth-journeys.spec.ts`) since they actually create accounts against the shared in-memory db.
 - OTPs and reset links are read back via `GET /api/dev/mailbox/:email` (`src/pages/api/dev/mailbox.$email.ts`), backed by the in-process `Map` in `src/server/mailbox.ts`. The endpoint 404s unless `import.meta.env.DEV` or `AUTH_DB_PATH === ":memory:"` — it must stay usable in both plain `vp dev` (for manual testing) and the `:memory:` preview e2e runs; don't gate it on only one of those.

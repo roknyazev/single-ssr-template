@@ -12,10 +12,11 @@ from it, keep the tooling, conventions, and auth flow, and build your app on top
   server) against a local SQLite db; the server-only pieces live in `src/server/`. See "Auth flow"
   in [AGENTS.md](./AGENTS.md).
 - **[shadcn/ui](https://ui.shadcn.com)** — components live in `src/shared/ui`; add more with
-  `pnpm ui:add <component>`.
+  `vp run ui:add <component>`.
 - **[Vite+](https://voidzero.dev)** (`vp`) — single CLI wrapping Vite, Rolldown, Vitest, tsdown,
-  Oxlint, Oxfmt, and Vite Task. All dev/build/lint/test/package-manager commands go through it; see
-  [AGENTS.md](./AGENTS.md) for the full command reference and pitfalls to avoid.
+  Oxlint, Oxfmt, and Vite Task. All dev/build/lint/test/package-manager commands go through it, with
+  `pnpm` as the underlying package manager; see [AGENTS.md](./AGENTS.md) for the full command
+  reference.
 - **[TanStack](https://tanstack.com)** Start/Router/Query/Form — file-based routing with route
   guards, a shared query client (`@/shared/query`), form hooks built on `useAppForm` + zod.
 - **React 19**, Tailwind CSS 4, i18next, **Feature-Sliced Design** (held by review discipline — no
@@ -42,30 +43,30 @@ session load may import from it. Read [AGENTS.md](./AGENTS.md) for the full impo
 
 ## Getting started
 
-Requires the [`vp`](https://voidzero.dev) CLI. Common commands are also wrapped as `package.json`
-scripts (`pnpm dev`, `pnpm e2e`, …), which call `vp` under the hood.
+Requires the [`vp`](https://voidzero.dev) CLI. Common commands are wrapped as `package.json`
+scripts, run with `vp run <script>` (e.g. `vp run dev`, `vp run e2e`).
 
 ```bash
-vp install                      # install dependencies
-pnpm dlx @better-auth/cli secret  # generate a BETTER_AUTH_SECRET
-pnpm dev                        # dev server on http://localhost:3000
+vp install                # install dependencies
+vp exec auth secret       # generate a BETTER_AUTH_SECRET
+vp run dev                # dev server on http://localhost:3000
 ```
 
 Copy `.env.example` to `.env.local` and set `BETTER_AUTH_SECRET`. `.env`/`*.local` are gitignored,
 so create `.env.local` yourself before running. The SQLite db defaults to `./dev-auth.db`
-(`AUTH_DB_PATH`); use `:memory:` for an ephemeral db (e2e runs use this). `pnpm auth:migrate`
+(`AUTH_DB_PATH`); use `:memory:` for an ephemeral db (e2e runs use this). `vp run auth:migrate`
 applies better-auth's SQLite migrations if you change the schema.
 
 Useful scripts (see root `package.json`):
 
 ```bash
-vp check                # format, lint, and type-check (the one validation gate)
-vp test                 # unit tests (watch); `vp test run` for once
-pnpm e2e                # build + run Playwright e2e (vp build && vp exec playwright test)
-pnpm build              # production build to dist/  (vp build)
-pnpm preview            # serve the built app        (vp preview)
-pnpm auth:migrate       # apply better-auth SQLite migrations
-pnpm ui:add <component> # add a shadcn/ui component to src/shared/ui
+vp check                  # format, lint, and type-check (the one validation gate)
+vp test                   # unit tests (watch); `vp test run` for once
+vp run e2e                # build + run Playwright e2e (vp build && vp exec playwright test)
+vp build                  # production build to dist/
+vp preview                # serve the built app
+vp run auth:migrate       # apply better-auth SQLite migrations
+vp run ui:add <component> # add a shadcn/ui component to src/shared/ui
 ```
 
 ## Testing
@@ -73,7 +74,7 @@ pnpm ui:add <component> # add a shadcn/ui component to src/shared/ui
 - **Unit tests** (`*.test.ts`, colocated with source) run via `vp test`, importing helpers from
   `vite-plus/test` rather than `vitest` directly. Run one file with `vp test run <path>`, or one
   test by name with `vp test run -t "<pattern>"`.
-- **E2e tests** live under the root `e2e/` directory and run via `pnpm e2e` (one Playwright project,
+- **E2e tests** live under the root `e2e/` directory and run via `vp run e2e` (one Playwright project,
   `playwright.config.ts`). Its `webServer` runs a production preview against an in-memory db
   (`AUTH_DB_PATH=:memory: vp preview`) on the `E2E_BASE_URL` port. Since every spec shares that one
   server, non-journey specs must stay state-free; full sign-up → verify → sign-in and password-reset
@@ -92,5 +93,5 @@ Click "Use this template" on GitHub to create a new repo with fresh git history,
 3. Read [AGENTS.md](./AGENTS.md) before making structural changes — it documents FSD import rules,
    form/schema conventions, TanStack Query conventions, and the auth-flow invariants (anti-
    enumeration, OTP-only verification) that the e2e tests depend on.
-4. Run `vp check` and `pnpm e2e` after scaffolding changes to confirm checks, tests, and the build
+4. Run `vp check` and `vp run e2e` after scaffolding changes to confirm checks, tests, and the build
    still pass.
