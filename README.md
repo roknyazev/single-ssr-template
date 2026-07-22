@@ -47,15 +47,16 @@ Requires the [`vp`](https://voidzero.dev) CLI. Common commands are wrapped as `p
 scripts, run with `vp run <script>` (e.g. `vp run dev`, `vp run e2e`).
 
 ```bash
-vp install                # install dependencies
-vp exec auth secret       # generate a BETTER_AUTH_SECRET
-vp run dev                # dev server on http://localhost:3000
+vp install                # 1. install dependencies
+vp exec auth secret       # 2. generate a BETTER_AUTH_SECRET (copy the printed value)
+cp .env.example .env.local  # 3. create your local env, then paste the secret into BETTER_AUTH_SECRET
+vp run auth:migrate       # 4. apply better-auth's SQLite migrations (creates ./dev-auth.db)
+vp run dev                # 5. dev server on http://localhost:3000
 ```
 
-Copy `.env.example` to `.env.local` and set `BETTER_AUTH_SECRET`. `.env`/`*.local` are gitignored,
-so create `.env.local` yourself before running. The SQLite db defaults to `./dev-auth.db`
-(`AUTH_DB_PATH`); use `:memory:` for an ephemeral db (e2e runs use this). `vp run auth:migrate`
-applies better-auth's SQLite migrations if you change the schema.
+`.env`/`*.local` are gitignored, so `.env.local` must be created (step 3) before running. The SQLite
+db defaults to `./dev-auth.db` (`AUTH_DB_PATH`); use `:memory:` for an ephemeral db (e2e runs use
+this). Re-run `vp run auth:migrate` whenever the auth schema changes.
 
 Useful scripts (see root `package.json`):
 
