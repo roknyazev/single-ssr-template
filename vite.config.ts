@@ -32,6 +32,9 @@ const config = defineConfig({
     },
     options: { typeAware: true, typeCheck: true },
   },
+  test: {
+    exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
+  },
   resolve: { tsconfigPaths: true },
   plugins: [
     devtools(),
